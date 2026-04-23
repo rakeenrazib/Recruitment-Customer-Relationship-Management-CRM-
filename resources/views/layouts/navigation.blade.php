@@ -1,139 +1,160 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
+<nav x-data="{ open: false }" class="relative z-[70] pt-5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="glass-nav rounded-[1.75rem] px-4 sm:px-6">
+            <div class="flex min-h-[78px] justify-between gap-4">
+                <div class="flex min-w-0 items-center gap-6">
+                    <div class="flex shrink-0 items-center">
+                        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 text-slate-900">
+                            <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white shadow-lg shadow-slate-950/20">TH</span>
+                            <span class="block font-display text-lg font-black leading-none tracking-tight">Talent Hub</span>
+                        </a>
+                    </div>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
-                        {{ __('Jobs') }}
-                    </x-nav-link>
-                    @if(auth()->user()->role === 'candidate')
-                        <x-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">
-                            {{ __('My Applications') }}
+                    <div class="hidden flex-wrap gap-2 sm:flex">
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                            {{ __('Dashboard') }}
                         </x-nav-link>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Settings Dropdown -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6 gap-3">
-
-                {{-- Notification Bell (candidates only) --}}
-                @if(auth()->check() && auth()->user()->role === 'candidate')
-                    @php
-                        $navUnread = \App\Models\AppNotification::where('user_id', auth()->id())
-                            ->where('is_read', false)->count();
-                    @endphp
-                    <a href="{{ route('notifications.index') }}"
-                       class="relative inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition"
-                       title="Notifications">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                        </svg>
-                        @if($navUnread > 0)
-                            <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+                        <x-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
+                            {{ __('Jobs') }}
+                        </x-nav-link>
+                        @if(auth()->user()->isCandidate())
+                            <x-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">
+                                {{ __('Apps') }}
+                            </x-nav-link>
+                            <x-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
+                                {{ __('Companies') }}
+                            </x-nav-link>
                         @endif
-                    </a>
-                @endif
+                        @if(auth()->user()->isRecruiter())
+                            <x-nav-link :href="route('recruiter.applications')" :active="request()->routeIs('recruiter.*')">
+                                {{ __('Applicants') }}
+                            </x-nav-link>
+                        @endif
+                        @if(auth()->user()->isCompany() && auth()->user()->company)
+                            <x-nav-link :href="route('companies.show', auth()->user()->company)" :active="request()->routeIs('companies.show')">
+                                {{ __('Company') }}
+                            </x-nav-link>
+                        @endif
+                    </div>
+                </div>
 
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                <div class="hidden items-center gap-3 sm:flex">
+                    @if(auth()->user()->isCandidate())
+                        @php
+                            $navUnread = \App\Models\AppNotification::where('user_id', auth()->id())->where('is_read', false)->count();
+                        @endphp
+                        <a href="{{ route('notifications.index') }}" class="relative inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-500 transition hover:-translate-y-0.5 hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700" title="Notifications">
+                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            @if($navUnread > 0)
+                                <span class="absolute right-1.5 top-1.5 inline-flex h-2.5 w-2.5 rounded-full bg-rose-500 ring-4 ring-white/90"></span>
+                            @endif
+                        </a>
+                    @endif
 
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
+                    <x-dropdown align="right" width="56">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/80 px-3 py-2 text-sm font-medium text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-200 hover:text-slate-900">
+                                @if(Auth::user()->profile_photo_path)
+                                    <img src="{{ asset('storage/' . Auth::user()->profile_photo_path) }}" alt="{{ Auth::user()->display_name }}" class="h-10 w-10 rounded-full object-cover ring-2 ring-white">
+                                @else
+                                    <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-xs font-bold text-white shadow-md">
+                                        {{ strtoupper(substr(Auth::user()->display_name, 0, 1)) }}
+                                    </span>
+                                @endif
+                                <span class="text-left">
+                                    <span class="block max-w-[11rem] truncate font-semibold text-slate-900">{{ Auth::user()->display_name }}</span>
+                                    <span class="block text-[11px] font-bold uppercase tracking-[0.22em] text-slate-400">{{ auth()->user()->role }}</span>
+                                </span>
+                            </button>
+                        </x-slot>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-
-                        <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-
-                            <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile Settings') }}
                             </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
-            </div>
 
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                            @if(auth()->user()->isCandidate() && auth()->user()->candidate)
+                                <x-dropdown-link :href="route('candidates.show', auth()->user()->candidate)">
+                                    {{ __('Public Profile') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if(auth()->user()->isRecruiter() && auth()->user()->recruiter)
+                                <x-dropdown-link :href="route('recruiters.show', auth()->user()->recruiter)">
+                                    {{ __('Public Profile') }}
+                                </x-dropdown-link>
+                            @endif
+                            @if(auth()->user()->isCompany() && auth()->user()->company)
+                                <x-dropdown-link :href="route('companies.show', auth()->user()->company)">
+                                    {{ __('Public Profile') }}
+                                </x-dropdown-link>
+                            @endif
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
+                <div class="flex items-center sm:hidden">
+                    <button @click="open = ! open" class="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white/80 text-slate-500 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700">
+                        <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                            <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden px-4 pt-3 sm:hidden">
+        <div class="glass-nav space-y-1 rounded-[1.5rem] px-2 py-3">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('jobs.index')" :active="request()->routeIs('jobs.*')">
                 {{ __('Jobs') }}
             </x-responsive-nav-link>
-            @if(auth()->user()->role === 'candidate')
+            @if(auth()->user()->isCandidate())
                 <x-responsive-nav-link :href="route('applications.index')" :active="request()->routeIs('applications.*')">
-                    {{ __('My Applications') }}
+                    {{ __('Apps') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('companies.index')" :active="request()->routeIs('companies.index')">
+                    {{ __('Companies') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('notifications.index')" :active="request()->routeIs('notifications.*')">
                     {{ __('Notifications') }}
-                    @php $mobileUnread = \App\Models\AppNotification::where('user_id', auth()->id())->where('is_read', false)->count(); @endphp
-                    @if($mobileUnread > 0)
-                        <span class="ml-1 inline-flex items-center justify-center px-1.5 py-0.5 text-[9px] font-bold text-white bg-red-500 rounded-full">{{ $mobileUnread }}</span>
-                    @endif
                 </x-responsive-nav-link>
             @endif
-        </div>
+            @if(auth()->user()->isRecruiter())
+                <x-responsive-nav-link :href="route('recruiter.applications')" :active="request()->routeIs('recruiter.*')">
+                    {{ __('Applicants') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(auth()->user()->isCompany() && auth()->user()->company)
+                <x-responsive-nav-link :href="route('companies.show', auth()->user()->company)" :active="request()->routeIs('companies.show')">
+                    {{ __('Company') }}
+                </x-responsive-nav-link>
+            @endif
+            <x-responsive-nav-link :href="route('profile.edit')">
+                {{ __('Profile Settings') }}
+            </x-responsive-nav-link>
 
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            <div class="mx-2 mt-4 rounded-[1.2rem] border border-white/70 bg-white/75 px-4 py-4">
+                <div class="text-base font-semibold text-slate-900">{{ Auth::user()->display_name }}</div>
+                <div class="mt-1 text-sm text-slate-500">{{ Auth::user()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>

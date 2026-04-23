@@ -12,6 +12,8 @@ class AppNotification extends Model
         'user_id',
         'type',
         'message',
+        'subject_type',
+        'subject_id',
         'is_read',
     ];
 

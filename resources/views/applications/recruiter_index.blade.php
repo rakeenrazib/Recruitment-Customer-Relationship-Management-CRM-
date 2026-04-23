@@ -1,134 +1,75 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('View Applications') }}</h2>
+        <h2 class="text-xl font-black text-stone-900">Applications</h2>
     </x-slot>
 
-    <div class="py-10 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            {{-- ── Search & Filters ─────────────────────────────── --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-                <form method="GET" action="{{ route('recruiter.applications') }}" class="flex flex-wrap gap-3 items-end">
-
-                    {{-- Search --}}
-                    <div class="flex-1 min-w-[200px]">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Search Candidates</label>
-                        <input type="text" name="search" value="{{ $search }}"
-                               placeholder="Name, email or skills..."
-                               class="w-full rounded-xl border-gray-200 text-sm text-gray-700 focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-
-                    {{-- Status Filter --}}
-                    <div class="min-w-[150px]">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Status</label>
-                        <select name="status" class="w-full rounded-xl border-gray-200 text-sm font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Statuses</option>
-                            <option value="pending"     @if($status === 'pending')     selected @endif>Applied</option>
-                            <option value="shortlisted" @if($status === 'shortlisted') selected @endif>Shortlisted</option>
-                            <option value="interview"   @if($status === 'interview')   selected @endif>Interview</option>
-                            <option value="rejected"    @if($status === 'rejected')    selected @endif>Rejected</option>
-                        </select>
-                    </div>
-
-                    {{-- Job Filter --}}
-                    <div class="min-w-[180px]">
-                        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Job</label>
-                        <select name="job_id" class="w-full rounded-xl border-gray-200 text-sm font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Jobs</option>
-                            @foreach($recruiterJobs as $rj)
-                                <option value="{{ $rj->id }}" @if($jobId == $rj->id) selected @endif>
-                                    {{ Str::limit($rj->title, 30) }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Submit --}}
-                    <button type="submit"
-                            class="px-5 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition">
-                        Filter
-                    </button>
-
-                    @if($search || $status || $jobId)
-                        <a href="{{ route('recruiter.applications') }}"
-                           class="px-5 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition">
-                            Clear
-                        </a>
-                    @endif
+    <div class="min-h-screen bg-stone-50 py-10">
+        <div class="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div class="rounded-[2rem] border border-stone-200 bg-white p-5 shadow-sm">
+                <form method="GET" action="{{ route('recruiter.applications') }}" class="grid gap-4 lg:grid-cols-[1.2fr_0.9fr_1fr_auto_auto]">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Search candidate name, email, or portfolio" class="rounded-2xl border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
+                    <select name="status" class="rounded-2xl border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
+                        <option value="">All statuses</option>
+                        <option value="applied" @selected($status === 'applied')>Applied</option>
+                        <option value="shortlisted" @selected($status === 'shortlisted')>Shortlisted</option>
+                        <option value="interview_scheduled" @selected($status === 'interview_scheduled')>Interview Scheduled</option>
+                        <option value="hired" @selected($status === 'hired')>Hired</option>
+                        <option value="rejected" @selected($status === 'rejected')>Rejected</option>
+                    </select>
+                    <select name="job_id" class="rounded-2xl border-stone-200 bg-stone-50 px-4 py-3 text-sm text-stone-900">
+                        <option value="">All jobs</option>
+                        @foreach($recruiterJobs as $recruiterJob)
+                            <option value="{{ $recruiterJob->id }}" @selected($jobId == $recruiterJob->id)>{{ $recruiterJob->title }}</option>
+                        @endforeach
+                    </select>
+                    <button type="submit" class="rounded-2xl bg-stone-900 px-5 py-3 text-sm font-bold text-white">Filter</button>
+                    <a href="{{ route('recruiter.applications') }}" class="rounded-2xl border border-stone-200 px-5 py-3 text-center text-sm font-bold text-stone-700">Clear</a>
                 </form>
             </div>
 
-            {{-- ── Results ──────────────────────────────────────── --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-extrabold text-gray-900">Applications by Job</h2>
-                    @if($search || $status || $jobId)
-                        <span class="text-xs text-gray-400 font-bold">
-                            Showing filtered results
-                        </span>
-                    @endif
-                </div>
-
-                @if($jobs->count() > 0)
-                    @foreach($jobs as $job)
-                        <div class="mb-8 border border-gray-100 rounded-xl overflow-hidden">
-                            <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <div class="rounded-[2rem] border border-stone-200 bg-white p-6 shadow-sm">
+                <div class="space-y-6">
+                    @forelse($jobs as $job)
+                        <div class="overflow-hidden rounded-[1.75rem] border border-stone-200">
+                            <div class="flex flex-col gap-4 bg-stone-50 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
-                                    <h3 class="font-extrabold text-gray-900">{{ $job->title }}</h3>
-                                    <p class="text-xs text-gray-500 mt-0.5">{{ $job->company }} &bull; {{ $job->location }}</p>
+                                    <h3 class="text-lg font-black text-stone-900">{{ $job->title }}</h3>
+                                    <p class="text-sm text-stone-500">{{ $job->company }}</p>
                                 </div>
-                                <div class="flex items-center gap-3">
-                                    <a href="{{ route('jobs.pipeline', $job) }}" class="text-xs font-bold text-purple-600 hover:underline">Pipeline</a>
-                                    <a href="{{ route('jobs.show', $job) }}" class="text-xs font-bold text-blue-600 hover:underline">View Job &rarr;</a>
+                                <div class="flex gap-3">
+                                    <a href="{{ route('jobs.pipeline', $job) }}" class="text-sm font-bold text-amber-700">Pipeline</a>
+                                    <a href="{{ route('jobs.show', $job) }}" class="text-sm font-bold text-cyan-700">View job</a>
                                 </div>
                             </div>
-
-                            <div class="p-6">
-                                @if($job->applications->count() > 0)
-                                    <div class="space-y-4">
-                                        @foreach($job->applications as $application)
-                                            <div class="p-4 border border-gray-100 rounded-xl bg-white shadow-sm flex justify-between items-start">
-                                                <div>
-                                                    <p class="font-extrabold text-gray-900">{{ $application->user->name }}</p>
-                                                    <p class="text-xs text-gray-500">{{ $application->user->email }}</p>
-                                                    @if($application->user->skills)
-                                                        <p class="text-xs text-gray-400 mt-0.5 italic">{{ Str::limit($application->user->skills, 60) }}</p>
-                                                    @endif
-                                                    <p class="text-xs text-gray-400 mt-1">Applied {{ $application->created_at->format('M d, Y') }}</p>
-                                                </div>
-                                                <div class="flex items-center gap-3 ml-4 flex-shrink-0">
-                                                    @php
-                                                        $sc = ['pending'=>'bg-yellow-100 text-yellow-700','shortlisted'=>'bg-blue-100 text-blue-700','interview'=>'bg-purple-100 text-purple-700','rejected'=>'bg-red-100 text-red-700'];
-                                                    @endphp
-                                                    <span class="text-[10px] font-bold uppercase px-2 py-1 rounded-lg {{ $sc[$application->status] ?? 'bg-gray-100 text-gray-700' }}">
-                                                        {{ ucfirst($application->status) }}
-                                                    </span>
-                                                    <a href="{{ route('applications.show', $application) }}"
-                                                       class="text-xs font-bold text-blue-600 hover:text-blue-800 underline underline-offset-2">
-                                                        View Details
-                                                    </a>
-                                                    @if($application->cv_path)
-                                                        <a href="{{ asset('storage/' . $application->cv_path) }}" target="_blank"
-                                                           class="text-xs font-bold text-gray-500 hover:text-gray-800">CV</a>
-                                                    @endif
-                                                </div>
+                            <div class="space-y-4 p-6">
+                                @forelse($job->applications as $application)
+                                    <div class="rounded-2xl border border-stone-100 bg-stone-50 p-4">
+                                        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                                            <div>
+                                                @if($application->candidate)
+                                                    <a href="{{ route('candidates.show', $application->candidate) }}" class="font-bold text-stone-900">{{ $application->candidate->full_name }}</a>
+                                                @else
+                                                    <p class="font-bold text-stone-900">{{ $application->user->name }}</p>
+                                                @endif
+                                                <p class="text-sm text-stone-500">{{ $application->user->email }}</p>
+                                                <p class="mt-1 text-sm text-stone-600">{{ \Illuminate\Support\Str::limit($application->candidate?->portfolio ?? $application->candidate?->details, 100) }}</p>
                                             </div>
-                                        @endforeach
+                                            <div class="flex items-center gap-4">
+                                                <span class="rounded-full bg-stone-900 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-white">{{ str_replace('_', ' ', $application->status) }}</span>
+                                                <a href="{{ route('applications.show', $application) }}" class="text-sm font-bold text-cyan-700">Review</a>
+                                            </div>
+                                        </div>
                                     </div>
-                                @else
-                                    <p class="text-gray-400 text-sm italic">No matching applications for this job.</p>
-                                @endif
+                                @empty
+                                    <p class="text-sm text-stone-500">No matching applications for this job.</p>
+                                @endforelse
                             </div>
                         </div>
-                    @endforeach
-                @else
-                    <div class="text-center py-12">
-                        <p class="text-sm font-bold text-gray-400">No applications found matching your filters.</p>
-                        <a href="{{ route('recruiter.applications') }}" class="text-xs text-blue-600 font-bold hover:underline mt-2 inline-block">Clear filters</a>
-                    </div>
-                @endif
+                    @empty
+                        <p class="text-sm text-stone-500">No applications found for the selected filters.</p>
+                    @endforelse
+                </div>
             </div>
-
         </div>
     </div>
 </x-app-layout>

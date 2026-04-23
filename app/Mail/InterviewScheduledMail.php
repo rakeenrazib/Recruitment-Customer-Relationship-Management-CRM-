@@ -13,12 +13,14 @@ class InterviewScheduledMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Application $application) {}
+    public function __construct(public Application $application)
+    {
+    }
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Interview Scheduled — ' . $this->application->job->title,
+            subject: 'Interview Scheduled - '.$this->application->job->title,
         );
     }
 
@@ -28,8 +30,8 @@ class InterviewScheduledMail extends Mailable
             markdown: 'emails.interview_scheduled',
             with: [
                 'candidateName' => $this->application->user->name,
-                'jobTitle'      => $this->application->job->title,
-                'company'       => $this->application->job->company,
+                'jobTitle' => $this->application->job->title,
+                'company' => $this->application->job->company,
             ],
         );
     }
