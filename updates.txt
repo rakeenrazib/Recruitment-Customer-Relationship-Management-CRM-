@@ -1,0 +1,12 @@
+Sumaita’s branch updates:
+1. Account registration expanded: Candidate, Recruiter, Company
+2. Recruiter account needs to manually send verification request to and be approved by affiliated registered Company before unlocking Recruiter actions
+3. Visitable public profiles of all users
+4. Candidates can follow Companies
+5. Admin table editable in database, contains email and phone number for Customer Support
+6. Design pattern implementation as per Project Proposal:
+	a. Observer: Alerts on new job listings
+	b. State Pattern: Transition between application stages
+	c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback).
+	d. Factory Pattern: Dynamic interview plans
+e. Front end design
