@@ -2,37 +2,40 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Events\ApplicationStatusUpdated;
 use App\Models\Application;
-use App\Models\AppNotification;
 use App\Models\Job;
-use App\Mail\InterviewScheduledMail;
+use App\States\Application\ApplicationStateFactory;
+use App\Strategies\InterviewEvaluation\HrFeedbackStrategy;
+use App\Strategies\InterviewEvaluation\ScoringRubricStrategy;
+use App\Strategies\InterviewEvaluation\TechnicalAssessmentStrategy;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 class ApplicationController extends Controller
 {
     public function recruiterIndex(Request $request)
     {
-        if (auth()->user()->role !== 'recruiter') {
-            abort(403);
-        }
+        abort_unless(auth()->user()->canRecruit(), 403);
 
-        $search   = $request->input('search', '');
-        $status   = $request->input('status', '');
-        $jobId    = $request->input('job_id', '');
+        $search = $request->input('search', '');
+        $status = $request->input('status', '');
+        $jobId = $request->input('job_id', '');
 
-        // All jobs posted by this recruiter (for the job filter dropdown)
-        $recruiterJobs = Job::where('user_id', auth()->id())->latest()->get();
+        $recruiterJobs = Job::where('user_id', auth()->id())->with('companyProfile')->latest()->get();
 
-        $query = \App\Models\Application::with(['job', 'user'])
-            ->whereHas('job', fn($q) => $q->where('user_id', auth()->id()));
+        $query = Application::with(['job.companyProfile', 'candidate.user', 'user'])
+            ->whereHas('job', fn ($q) => $q->where('user_id', auth()->id()));
 
         if ($search) {
-            $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('skills', 'like', "%{$search}%");
+            $query->where(function ($scoped) use ($search) {
+                $scoped->whereHas('candidate', function ($q) use ($search) {
+                    $q->where('full_name', 'like', "%{$search}%")
+                        ->orWhere('portfolio', 'like', "%{$search}%")
+                        ->orWhere('details', 'like', "%{$search}%");
+                })->orWhereHas('user', function ($q) use ($search) {
+                    $q->where('email', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -46,18 +49,18 @@ class ApplicationController extends Controller
 
         $applications = $query->latest()->get();
 
-        // Group applications under their jobs for the grouped view
         $jobs = $recruiterJobs->map(function ($job) use ($applications) {
             $job->setRelation('applications', $applications->where('job_id', $job->id)->values());
+
             return $job;
-        })->filter(fn($job) => $job->applications->count() > 0 || !request()->anyFilled(['search','status','job_id']));
+        })->filter(fn ($job) => $job->applications->count() > 0 || ! request()->anyFilled(['search', 'status', 'job_id']));
 
         return view('applications.recruiter_index', compact('jobs', 'recruiterJobs', 'search', 'status', 'jobId'));
     }
 
     public function index()
     {
-        $applications = Application::with('job')
+        $applications = Application::with(['job.companyProfile', 'candidate'])
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
@@ -67,9 +70,7 @@ class ApplicationController extends Controller
 
     public function store(Request $request, Job $job)
     {
-        if (auth()->user()->role !== 'candidate') {
-            abort(403, 'Only candidates can apply.');
-        }
+        abort_unless(auth()->user()->isCandidate(), 403, 'Only candidates can apply.');
 
         $request->validate([
             'cover_letter' => 'nullable|string',
@@ -84,65 +85,94 @@ class ApplicationController extends Controller
             return redirect()->route('jobs.show', $job)->with('error', 'You already applied to this job.');
         }
 
-        $cvPath = null;
-        if ($request->hasFile('cv_file')) {
-            $cvPath = $request->file('cv_file')->store('cvs', 'public');
-        }
+        $cvPath = $request->hasFile('cv_file')
+            ? $request->file('cv_file')->store('cvs', 'public')
+            : null;
 
         Application::create([
             'job_id' => $job->id,
             'user_id' => auth()->id(),
+            'candidate_id' => auth()->user()->candidate?->id,
             'cover_letter' => $request->cover_letter,
             'cv_path' => $cvPath,
-            'status' => 'pending',
+            'status' => 'applied',
+            'status_updated_at' => now(),
         ]);
 
         return redirect()->route('applications.index')->with('success', 'Application submitted successfully.');
     }
+
     public function show(Application $application)
     {
-        $application->load(['job', 'user']);
+        $application->load(['job.companyProfile', 'candidate.user', 'job.recruiter.user', 'user']);
+
         if ($application->user_id !== auth()->id() && $application->job->user_id !== auth()->id()) {
             abort(403);
         }
+
         return view('applications.show', compact('application'));
     }
 
     public function destroy(Application $application)
     {
-        if ($application->user_id !== auth()->id()) {
-            abort(403);
-        }
+        abort_unless($application->user_id === auth()->id(), 403);
 
-        if ($application->status !== 'pending') {
-            return back()->with('error', 'Only pending applications can be withdrawn.');
+        if ($application->status !== 'applied') {
+            return back()->with('error', 'Only applied applications can be withdrawn.');
         }
 
         $application->delete();
+
         return redirect()->route('dashboard')->with('success', 'Application withdrawn successfully.');
     }
 
     public function updateStatus(Request $request, Application $application)
     {
-        if ($application->job->user_id !== auth()->id()) {
-            abort(403);
+        abort_unless($application->job->user_id === auth()->id(), 403);
+
+        $validated = $request->validate([
+            'status' => 'required|in:applied,shortlisted,interview_scheduled,hired,rejected',
+            'notes' => 'nullable|string',
+            'evaluation_strategy' => 'nullable|in:scoring_rubric,technical_assessment,hr_feedback',
+            'evaluation_score' => 'nullable|numeric',
+            'evaluation_summary' => 'nullable|string',
+        ]);
+
+        $currentState = ApplicationStateFactory::make($application);
+        $targetStatus = $validated['status'];
+
+        if ($targetStatus !== $application->status && ! $currentState->canTransitionTo($targetStatus)) {
+            return back()->with('error', "Cannot move an application from {$application->status} to {$targetStatus}.");
         }
 
-        $request->validate([
-            'status' => 'required|in:pending,shortlisted,interview,rejected',
-            'notes'  => 'nullable|string',
-        ]);
+        $evaluation = [];
+        $strategyKey = $validated['evaluation_strategy'] ?? null;
+
+        if ($strategyKey) {
+            $strategy = match ($strategyKey) {
+                'technical_assessment' => new TechnicalAssessmentStrategy(),
+                'hr_feedback' => new HrFeedbackStrategy(),
+                default => new ScoringRubricStrategy(),
+            };
+
+            $evaluation = $strategy->evaluate($application, [
+                'score' => $validated['evaluation_score'] ?? null,
+                'scores' => [$validated['evaluation_score'] ?? null],
+                'summary' => $validated['evaluation_summary'] ?? null,
+            ]);
+        }
 
         $oldStatus = $application->status;
-        $newStatus = $request->status;
 
         $application->update([
-            'status' => $newStatus,
-            'notes'  => $request->notes ?? $application->notes,
+            'status' => $targetStatus,
+            'status_updated_at' => now(),
+            'notes' => $validated['notes'] ?? $application->notes,
+            ...$evaluation,
         ]);
 
-        if ($oldStatus !== $newStatus) {
-            event(new \App\Events\ApplicationStatusUpdated($application, $newStatus));
+        if ($oldStatus !== $targetStatus) {
+            event(new ApplicationStatusUpdated($application->fresh(['job', 'user']), $targetStatus));
         }
 
         $redirect = $request->input('_pipeline_redirect');

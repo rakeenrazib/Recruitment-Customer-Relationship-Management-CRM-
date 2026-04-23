@@ -1,166 +1,109 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
+        <div class="flex items-center justify-between">
             <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    Recruitment Pipeline
-                </h2>
-                <p class="text-sm text-gray-500 mt-0.5">
-                    {{ $job->title }} &mdash; {{ $job->company }}
-                </p>
+                <h2 class="text-xl font-black text-stone-900">Recruitment Pipeline</h2>
+                <p class="mt-1 text-sm text-stone-500">{{ $job->title }} &middot; {{ $job->company }}</p>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('jobs.show', $job) }}"
-                   class="text-sm font-bold text-gray-500 hover:text-gray-800 transition">
-                    View Job Details
-                </a>
-                <a href="{{ route('dashboard') }}"
-                   class="text-sm font-bold text-gray-500 hover:text-gray-800 transition">
-                    &larr; Dashboard
-                </a>
-            </div>
+            <a href="{{ route('jobs.show', $job) }}" class="text-sm font-bold text-stone-500">Back to Job</a>
         </div>
     </x-slot>
 
-    <div class="py-8 bg-gray-50 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    @php
+        $labels = [
+            'applied' => 'Applied',
+            'shortlisted' => 'Shortlisted',
+            'interview_scheduled' => 'Interview Scheduled',
+            'hired' => 'Hired',
+            'rejected' => 'Rejected',
+        ];
+    @endphp
 
-            @if(session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 text-sm font-semibold">
-                    ✓ {{ session('success') }}
-                </div>
-            @endif
+    <div class="min-h-screen bg-stone-50 py-8">
+        <div class="mx-auto max-w-6xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div class="panel p-5">
+                <form method="GET" action="{{ route('jobs.pipeline', $job) }}" class="flex flex-col gap-4 lg:flex-row lg:items-center">
+                    <input type="text" name="search" value="{{ $search }}" placeholder="Search by candidate name, email, or portfolio" class="field-input min-w-[280px] flex-1">
+                    <input type="hidden" name="stage" value="{{ $stage }}">
+                    <button type="submit" class="btn-primary px-5 py-3">Search</button>
+                </form>
 
-            {{-- Search bar --}}
-            <form method="GET" action="{{ route('jobs.pipeline', $job) }}" class="mb-5 flex gap-3 items-center">
-                <div class="flex-1">
-                    <input type="text" name="search" value="{{ $search }}"
-                           placeholder="Search candidates by name, email or skills..."
-                           class="w-full rounded-xl border-gray-200 text-sm text-gray-700 focus:ring-purple-500 focus:border-purple-500">
-                </div>
-                <button type="submit"
-                        class="px-5 py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:bg-purple-700 transition">
-                    Search
-                </button>
-                @if($search)
-                    <a href="{{ route('jobs.pipeline', $job) }}"
-                       class="px-5 py-2.5 bg-gray-100 text-gray-600 text-sm font-bold rounded-xl hover:bg-gray-200 transition">
-                        Clear
-                    </a>
-                @endif
-            </form>
-
-            {{-- Summary bar --}}
-            <div class="grid grid-cols-4 gap-4 mb-6">
-                @php
-                    $colMeta = [
-                        'pending'     => ['label' => 'Applied',      'color' => 'text-yellow-600', 'bg' => 'bg-yellow-50',  'border' => 'border-yellow-200'],
-                        'shortlisted' => ['label' => 'Shortlisted',  'color' => 'text-blue-600',   'bg' => 'bg-blue-50',    'border' => 'border-blue-200'],
-                        'interview'   => ['label' => 'Interview',     'color' => 'text-purple-600', 'bg' => 'bg-purple-50',  'border' => 'border-purple-200'],
-                        'rejected'    => ['label' => 'Rejected',      'color' => 'text-red-600',    'bg' => 'bg-red-50',     'border' => 'border-red-200'],
-                    ];
-                @endphp
-                @foreach($colMeta as $key => $meta)
-                    <div class="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3 shadow-sm">
-                        <div class="text-2xl font-extrabold {{ $meta['color'] }}">
-                            {{ $columns[$key]->count() }}
-                        </div>
-                        <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ $meta['label'] }}</p>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-
-            {{-- Kanban Board --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-
-                @foreach($colMeta as $statusKey => $meta)
-                    <div class="flex flex-col">
-
-                        {{-- Column Header --}}
-                        <div class="{{ $meta['bg'] }} {{ $meta['border'] }} border rounded-xl px-4 py-3 mb-3 flex items-center justify-between">
-                            <span class="text-xs font-extrabold {{ $meta['color'] }} uppercase tracking-widest">
-                                {{ $meta['label'] }}
-                            </span>
-                            <span class="text-xs font-bold text-gray-400 bg-white rounded-full px-2 py-0.5 border border-gray-100">
+                <div class="mt-5 flex flex-wrap gap-3">
+                    @foreach($labels as $statusKey => $label)
+                        <a
+                            href="{{ route('jobs.pipeline', ['job' => $job, 'stage' => $statusKey, 'search' => $search]) }}"
+                            class="{{ $stage === $statusKey ? 'border-slate-950 bg-slate-950 text-white' : 'border-slate-700/70 bg-slate-900/10 text-slate-300 hover:bg-slate-800 hover:text-white' }} inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold transition"
+                        >
+                            <span>{{ $label }}</span>
+                            <span class="{{ $stage === $statusKey ? 'bg-white/15 text-white' : 'bg-slate-800 text-slate-100' }} rounded-full px-2 py-0.5 text-xs">
                                 {{ $columns[$statusKey]->count() }}
                             </span>
-                        </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
 
-                        {{-- Cards --}}
-                        <div class="space-y-3 flex-1">
-                            @forelse($columns[$statusKey] as $application)
-                                <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition">
-
-                                    {{-- Candidate info --}}
-                                    <div class="mb-3">
-                                        <h4 class="text-sm font-extrabold text-gray-900 leading-tight">
-                                            {{ $application->user->name }}
-                                        </h4>
-                                        <p class="text-xs text-gray-500 mt-0.5">{{ $application->user->email }}</p>
-                                        @if($application->user->skills)
-                                            <p class="text-xs text-gray-400 mt-1 line-clamp-2 italic">
-                                                {{ Str::limit($application->user->skills, 60) }}
-                                            </p>
-                                        @endif
-                                        <p class="text-[10px] text-gray-300 mt-1 font-medium">
-                                            Applied {{ $application->created_at->format('M d, Y') }}
-                                        </p>
-                                    </div>
-
-                                    {{-- View Details --}}
-                                    <a href="{{ route('applications.show', $application) }}"
-                                       class="block w-full text-center text-xs font-bold py-1.5 mb-3 rounded-lg bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-100 transition">
-                                        View Details
-                                    </a>
-
-                                    {{-- Move buttons (exclude current status) --}}
-                                    <div class="space-y-1.5">
-                                        @if($statusKey !== 'shortlisted')
-                                            <form action="{{ route('applications.update-status', $application) }}" method="POST">
-                                                @csrf @method('PATCH')
-                                                <input type="hidden" name="status" value="shortlisted">
-                                                <input type="hidden" name="_pipeline_redirect" value="{{ route('jobs.pipeline', $job) }}">
-                                                <button type="submit"
-                                                        class="w-full text-[10px] font-bold py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 transition">
-                                                    → Shortlist
-                                                </button>
-                                            </form>
-                                        @endif
-                                        @if($statusKey !== 'interview')
-                                            <form action="{{ route('applications.update-status', $application) }}" method="POST">
-                                                @csrf @method('PATCH')
-                                                <input type="hidden" name="status" value="interview">
-                                                <input type="hidden" name="_pipeline_redirect" value="{{ route('jobs.pipeline', $job) }}">
-                                                <button type="submit"
-                                                        class="w-full text-[10px] font-bold py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-100 transition">
-                                                    → Interview
-                                                </button>
-                                            </form>
-                                        @endif
-                                        @if($statusKey !== 'rejected')
-                                            <form action="{{ route('applications.update-status', $application) }}" method="POST">
-                                                @csrf @method('PATCH')
-                                                <input type="hidden" name="status" value="rejected">
-                                                <input type="hidden" name="_pipeline_redirect" value="{{ route('jobs.pipeline', $job) }}">
-                                                <button type="submit"
-                                                        class="w-full text-[10px] font-bold py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 border border-red-100 transition">
-                                                    → Reject
-                                                </button>
-                                            </form>
-                                        @endif
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="bg-white rounded-xl border border-dashed border-gray-200 p-6 text-center">
-                                    <p class="text-xs text-gray-300 font-bold uppercase tracking-widest">Empty</p>
-                                </div>
-                            @endforelse
-                        </div>
+            <div class="panel p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="eyebrow">{{ $labels[$stage] }}</p>
+                        <h3 class="mt-2 text-2xl font-black text-slate-950">{{ $columns[$stage]->count() }} candidate{{ $columns[$stage]->count() === 1 ? '' : 's' }}</h3>
                     </div>
-                @endforeach
+                    <span class="pill bg-slate-950 text-white">{{ $job->title }}</span>
+                </div>
 
+                <div class="mt-6 space-y-4">
+                    @forelse($columns[$stage] as $application)
+                        <div class="panel-soft p-5">
+                            <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                                <div class="flex items-start gap-4">
+                                    @if($application->candidate?->user?->profile_photo_path)
+                                        <img src="{{ asset('storage/' . $application->candidate->user->profile_photo_path) }}" alt="{{ $application->candidate?->full_name ?? $application->user->name }}" class="h-16 w-16 rounded-2xl object-cover">
+                                    @else
+                                        <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-950 text-lg font-black text-white">
+                                            {{ strtoupper(substr($application->candidate?->full_name ?? $application->user->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+
+                                    <div class="min-w-0">
+                                        <div class="flex flex-wrap items-center gap-3">
+                                            <p class="text-lg font-black text-slate-950">{{ $application->candidate?->full_name ?? $application->user->name }}</p>
+                                            <span class="pill bg-slate-950 text-white">{{ str_replace('_', ' ', $application->status) }}</span>
+                                        </div>
+                                        <p class="mt-1 text-sm text-slate-500">{{ $application->user->email }}</p>
+                                        @if($application->candidate?->portfolio)
+                                            <p class="mt-2 text-sm text-slate-400">{{ \Illuminate\Support\Str::limit($application->candidate->portfolio, 120) }}</p>
+                                        @endif
+                                        <div class="mt-3 flex flex-wrap gap-4 text-sm font-bold">
+                                            @if($application->candidate)
+                                                <a href="{{ route('candidates.show', $application->candidate) }}" class="text-teal-400">Public profile</a>
+                                            @endif
+                                            <a href="{{ route('applications.show', $application) }}" class="text-cyan-400">View application</a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid gap-2 sm:grid-cols-2 lg:w-[21rem]">
+                                    @foreach($labels as $moveStatus => $moveLabel)
+                                        @if($moveStatus !== $stage)
+                                            <form method="POST" action="{{ route('applications.update-status', $application) }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="{{ $moveStatus }}">
+                                                <input type="hidden" name="_pipeline_redirect" value="{{ route('jobs.pipeline', ['job' => $job, 'stage' => $stage, 'search' => $search]) }}">
+                                                <button type="submit" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-100 transition hover:border-teal-400 hover:text-white">
+                                                    Move to {{ $moveLabel }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="rounded-2xl border border-dashed border-slate-700 p-10 text-center text-sm text-slate-400">No candidates in this stage.</div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
