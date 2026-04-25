@@ -9,10 +9,13 @@ class CandidateCompanyObserver implements CandidateObserverInterface
 {
     public function __construct(
         private Candidate $candidate,
-        private readonly NotificationService $notifications = new NotificationService(),
+        ?NotificationService $notifications = null,
     )
     {
+        $this->notifications = $notifications ?? NotificationService::getInstance();
     }
+
+    private readonly NotificationService $notifications;
 
     public function candidate(): Candidate
     {

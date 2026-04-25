@@ -291,6 +291,9 @@
                             <h3 class="mt-2 font-display text-xl font-black text-slate-950">Useful Links</h3>
                             <div class="mt-4 space-y-3">
                                 <a href="{{ route('profile.edit') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Profile settings</a>
+                                @if(auth()->user()->isRecruiter() && auth()->user()->canRecruit())
+                                    <a href="{{ route('jobs.create') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Add New Job</a>
+                                @endif
                                 @if(auth()->user()->isRecruiter() && auth()->user()->recruiter)
                                 <a href="{{ route('recruiters.show', auth()->user()->recruiter) }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Recruiter profile</a>
                                 @endif

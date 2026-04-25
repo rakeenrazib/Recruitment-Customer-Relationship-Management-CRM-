@@ -7,9 +7,12 @@ use App\Services\NotificationService;
 
 class BasicNotification implements NotificationInterface
 {
-    public function __construct(private readonly NotificationService $notifications = new NotificationService())
+    public function __construct(?NotificationService $notifications = null)
     {
+        $this->notifications = $notifications ?? NotificationService::getInstance();
     }
+
+    private readonly NotificationService $notifications;
 
     /**
      * Save the notification to the database.
