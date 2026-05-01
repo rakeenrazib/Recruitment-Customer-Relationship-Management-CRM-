@@ -1,24 +1,36 @@
-Sumaita's branch updates:
+﻿(1) Sumaita's branch updates:
 1. Account registration expanded: Candidate, Recruiter, Company
 2. Recruiter account needs to manually send verification request to and be approved by affiliated registered Company before unlocking Recruiter actions
 3. Visitable public profiles of all users
 4. Candidates can follow Companies
 5. Admin table editable in database, contains email and phone number for Customer Support
 6. Design pattern implementation as per Project Proposal:
-   a. Observer: Alerts on new job listings
-   b. State Pattern: Transition between application stages
-   c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
-   d. Factory Pattern: Dynamic interview plans
+	a. Observer: Alerts on new job listings
+	b. State Pattern: Transition between application stages
+	c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
+	d. Factory Pattern: Dynamic interview plans
 7. Front end design
 
-Nafiz's branch updates:
+(2) Nafiz's branch updates:
 1. Implemented Singleton pattern in the notification system through NotificationService
 2. Updated notification-related classes to use one shared NotificationService instance
 3. Added unit tests to verify shared singleton instance behavior and notification deduplication
 4. Added "Add New Job" to the recruiter dashboard Useful Links section
 5. Existing design patterns in the project now include:
-   a. Observer Pattern: Alerts on new job listings and company updates
-   b. State Pattern: Transition between application stages
-   c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
-   d. Factory Pattern: Dynamic interview plans
-   e. Singleton Pattern: Centralized notification management
+	a. Observer Pattern: Alerts on new job listings and company updates
+	b. State Pattern: Transition between application stages
+	c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
+	d. Factory Pattern: Dynamic interview plans
+	e. Singleton Pattern: Centralized notification management
+
+(3) Latest updates:
+1. Implemented Singleton pattern for database connection management
+2. Implemented expanded Strategy pattern for application evaluation methods
+	a. Added technical assessment, HR feedback, and behavioral assessment evaluation records
+	b. Recruiters can publish and update separate evaluations for each application
+	c. Candidates receive notifications when evaluations are published or updated
+	d. Candidates can open evaluation notifications and view the exact evaluation details
+3. Modified Observer pattern for Company Follower notifications
+	a. Candidates following a company receive alerts for new job listings and company updates
+4. Added comments to Singleton, Strategy, and Observer pattern code
+5. Added application_evaluations table migration and applied it to the SQLite database
