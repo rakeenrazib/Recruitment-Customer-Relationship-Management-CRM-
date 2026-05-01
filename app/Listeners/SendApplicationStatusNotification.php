@@ -28,9 +28,10 @@ class SendApplicationStatusNotification
 
         $messages = [
             'shortlisted' => "You have been shortlisted for \"{$jobTitle}\".",
-            'interview'   => "An interview has been scheduled for \"{$jobTitle}\". We will contact you with details shortly.",
+            'interview_scheduled' => "An interview has been scheduled for \"{$jobTitle}\". We will contact you with details shortly.",
+            'hired' => "Congratulations. You have been marked hired for \"{$jobTitle}\".",
             'rejected'    => "Your application for \"{$jobTitle}\" was not successful at this time.",
-            'pending'     => "Your application for \"{$jobTitle}\" has been moved back to pending review.",
+            'applied'     => "Your application for \"{$jobTitle}\" is under review.",
         ];
 
         if (!isset($messages[$newStatus])) {
@@ -48,7 +49,7 @@ class SendApplicationStatusNotification
         $notification = new LogNotificationDecorator($notification);
 
         // Wrap with email decorator only for interview status
-        if ($newStatus === 'interview') {
+        if ($newStatus === 'interview_scheduled') {
             $notification = new EmailNotificationDecorator($notification, $application);
         }
 
