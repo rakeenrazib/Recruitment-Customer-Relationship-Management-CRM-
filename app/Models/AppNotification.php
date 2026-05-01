@@ -21,4 +21,21 @@ class AppNotification extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function targetUrl(): ?string
+    {
+        if ($this->subject_type === ApplicationEvaluation::class && $this->subject_id) {
+            return route('notifications.open', $this);
+        }
+
+        if ($this->subject_type === Application::class && $this->subject_id) {
+            return route('notifications.open', $this);
+        }
+
+        if (str_starts_with($this->type, 'evaluation-')) {
+            return route('notifications.open', $this);
+        }
+
+        return null;
+    }
 }

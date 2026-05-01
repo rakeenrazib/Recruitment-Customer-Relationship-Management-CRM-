@@ -7,8 +7,12 @@ use App\Models\Job;
 
 class InterviewPlanFactory
 {
-    public static function createForJob(Job $job, string $strategy = 'scoring_rubric'): InterviewPlan
+    public static function createForJob(Job $job, string $strategy = 'technical_assessment'): InterviewPlan
     {
+        if ($strategy === 'scoring_rubric') {
+            $strategy = 'technical_assessment';
+        }
+
         $stages = [
             ['name' => 'Screening', 'owner' => 'Recruiter', 'goal' => 'Validate fit and availability'],
             ['name' => 'Technical', 'owner' => 'Hiring Team', 'goal' => 'Assess role-specific capability'],

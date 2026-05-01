@@ -4,31 +4,12 @@ namespace App\Services;
 
 use App\Models\AppNotification;
 use App\Models\User;
-use LogicException;
 
 class NotificationService
 {
-    private static ?self $instance = null;
-
-    private function __construct()
-    {
-    }
-
-    public static function getInstance(): self
-    {
-        return self::$instance ??= new self();
-    }
-
-    public function __clone(): void
-    {
-        throw new LogicException('NotificationService is a singleton and cannot be cloned.');
-    }
-
-    public function __wakeup(): void
-    {
-        throw new LogicException('NotificationService is a singleton and cannot be unserialized.');
-    }
-
+    // This service is intentionally a regular service class now.
+    // The professor asked us to move the Singleton pattern away from
+    // notifications and re-implement it for database connection handling.
     public function send(User $user, string $message, string $type, ?string $subjectType = null, ?int $subjectId = null): AppNotification
     {
         $subjectType = $subjectType ?: null;

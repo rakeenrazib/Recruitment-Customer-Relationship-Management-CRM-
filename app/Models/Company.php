@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Observers\CompanySubject;
 
 class Company extends Model
 {
-    use CompanySubject;
-
     protected $fillable = [
         'user_id',
         'company_name',

@@ -42,9 +42,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/applications/{application}', [ApplicationController::class, 'show'])->name('applications.show');
     Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     Route::patch('/applications/{application}/status', [ApplicationController::class, 'updateStatus'])->name('applications.update-status');
+    Route::post('/applications/{application}/evaluations', [ApplicationController::class, 'storeEvaluation'])->name('applications.evaluations.store');
+    Route::patch('/applications/{application}/evaluations/{evaluation}', [ApplicationController::class, 'updateEvaluation'])->name('applications.evaluations.update');
+    Route::delete('/applications/{application}/evaluations/{evaluation}', [ApplicationController::class, 'destroyEvaluation'])->name('applications.evaluations.destroy');
     Route::get('/recruiter/applications', [ApplicationController::class, 'recruiterIndex'])->name('recruiter.applications');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])->name('notifications.open');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.mark-read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');

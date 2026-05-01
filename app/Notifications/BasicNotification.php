@@ -9,7 +9,9 @@ class BasicNotification implements NotificationInterface
 {
     public function __construct(?NotificationService $notifications = null)
     {
-        $this->notifications = $notifications ?? NotificationService::getInstance();
+        // Notifications no longer use Singleton. Each collaborator may receive
+        // a regular NotificationService instance through construction.
+        $this->notifications = $notifications ?? new NotificationService();
     }
 
     private readonly NotificationService $notifications;

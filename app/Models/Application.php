@@ -15,9 +15,6 @@ class Application extends Model
         'status_updated_at',
         'cv_path',
         'notes',
-        'evaluation_method',
-        'evaluation_score',
-        'evaluation_summary',
     ];
 
     protected function casts(): array
@@ -40,5 +37,10 @@ class Application extends Model
     public function candidate()
     {
         return $this->belongsTo(Candidate::class);
+    }
+
+    public function evaluations()
+    {
+        return $this->hasMany(ApplicationEvaluation::class)->latest();
     }
 }

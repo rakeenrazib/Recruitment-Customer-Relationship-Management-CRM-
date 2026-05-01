@@ -132,7 +132,12 @@ class JobController extends Controller
         ]);
 
         $job->update($validated + ['company' => $job->companyProfile?->company_name ?? $job->company]);
-        InterviewPlanFactory::createForJob($job, $job->interviewPlan?->evaluation_strategy ?? 'scoring_rubric');
+        $strategy = $job->interviewPlan?->evaluation_strategy;
+        if ($strategy === 'scoring_rubric') {
+            $strategy = 'technical_assessment';
+        }
+
+        InterviewPlanFactory::createForJob($job, $strategy ?? 'technical_assessment');
 
         return redirect()->route('dashboard')->with('success', 'Job updated successfully.');
     }

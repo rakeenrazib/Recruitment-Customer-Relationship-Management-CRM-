@@ -256,8 +256,13 @@
                             </div>
                             <div class="space-y-3">
                                 @forelse($notifications as $notification)
+                                    @php($targetUrl = $notification->targetUrl())
                                     <div class="panel-soft p-4">
-                                        <p class="text-sm font-semibold text-slate-900">{{ $notification->message }}</p>
+                                        @if($targetUrl)
+                                            <a href="{{ $targetUrl }}" class="block text-sm font-semibold text-slate-900 transition hover:text-teal-700">{{ $notification->message }}</a>
+                                        @else
+                                            <p class="text-sm font-semibold text-slate-900">{{ $notification->message }}</p>
+                                        @endif
                                         <p class="mt-2 text-[11px] uppercase tracking-[0.22em] text-slate-400">{{ str_replace('_', ' ', $notification->type) }}</p>
                                     </div>
                                 @empty
