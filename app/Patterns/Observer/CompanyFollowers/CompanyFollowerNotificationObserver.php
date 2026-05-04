@@ -28,12 +28,20 @@ class CompanyFollowerNotificationObserver implements ObserverInterface
      */
     public function notify(): void
     {
-        $this->notificationService->send(
+        // 1. Start with the base notification
+        $notification = new \App\Notifications\BasicNotification($this->notificationService);
+
+        // 2. Wrap it with Log Decorator
+        $notification = new \App\Notifications\LogNotificationDecorator($notification);
+
+        // 3. Wrap it with Email Decorator
+        $notification = new \App\Notifications\EmailNotificationDecorator($notification);
+
+        // 4. Send the notification
+        $notification->send(
             $this->candidate->user,
             $this->subject->getMessage(),
-            $this->subject->getNotificationType(),
-            $this->subject->getSubjectType(),
-            $this->subject->getSubjectId(),
+            $this->subject->getNotificationType()
         );
     }
 }

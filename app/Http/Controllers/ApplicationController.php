@@ -8,7 +8,7 @@ use App\Models\ApplicationEvaluation;
 use App\Models\Job;
 use App\Patterns\Strategy\InterviewEvaluation\InterviewEvaluationContext;
 use App\Services\NotificationService;
-use App\States\Application\ApplicationStateFactory;
+use App\Patterns\Strategy\StatusTransition\TransitionStrategyContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -135,10 +135,10 @@ class ApplicationController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $currentState = ApplicationStateFactory::make($application);
+        $transitionStrategy = TransitionStrategyContext::getStrategy($application->status);
         $targetStatus = $validated['status'];
 
-        if ($targetStatus !== $application->status && ! $currentState->canTransitionTo($targetStatus)) {
+        if ($targetStatus !== $application->status && ! $transitionStrategy->validateTransition($targetStatus)) {
             return back()->with('error', "Cannot move an application from {$application->status} to {$targetStatus}.");
         }
 
