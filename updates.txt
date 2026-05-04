@@ -1,0 +1,32 @@
+(1) Sumaita's branch updates:
+1. Account registration expanded: Candidate, Recruiter, Company
+2. Recruiter account needs to manually send verification request to and be approved by affiliated registered Company before unlocking Recruiter actions
+3. Visitable public profiles of all users
+4. Candidates can follow Companies
+5. Admin table editable in database, contains email and phone number for Customer Support
+6. Design pattern implementation as per Project Proposal:
+	a. Observer: Alerts on new job listings
+	b. State Pattern: Transition between application stages
+	c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
+	d. Factory Pattern: Dynamic interview plans
+7. Front end design
+
+(2) Nafiz's branch updates:
+1. Implemented Singleton pattern in the notification system through NotificationService
+2. Updated notification-related classes to use one shared NotificationService instance
+3. Added unit tests to verify shared singleton instance behavior and notification deduplication
+4. Added "Add New Job" to the recruiter dashboard Useful Links section
+5. Existing design patterns in the project now include:
+	a. Observer Pattern: Alerts on new job listings and company updates
+	b. State Pattern: Transition between application stages
+	c. Strategy Pattern: Multiple evaluation methods (scoring rubrics, technical assessments, HR feedback)
+	d. Factory Pattern: Dynamic interview plans
+	e. Singleton Pattern: Centralized notification management
+
+(3) Updates:
+1. Implemented Singleton pattern for database connection
+2. Implemented Strategy pattern for evaluation methods
+	a. Evaluation methods expanded
+	b. Candidate receives notification for evaluation
+3. Modified Observer pattern for Company Follower notifications
+4. Added comments to Singleton, Strategy, Obersever pattern codes

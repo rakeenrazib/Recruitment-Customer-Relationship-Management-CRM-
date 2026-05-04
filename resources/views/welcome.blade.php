@@ -1,98 +1,79 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'JobBoard CRM') }}</title>
-
-    <!-- Fonts -->
+    <title>{{ config('app.name', 'Talent Hub') }}</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-
-    <!-- Scripts/Styles -->
+    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600,700,800|space-grotesk:500,700&display=swap" rel="stylesheet" />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="antialiased bg-slate-50 text-slate-900 font-sans selection:bg-blue-500 selection:text-white">
-    <div class="relative min-h-screen flex flex-col">
-        <!-- Subtle Background Pattern -->
-        <div class="absolute inset-0 z-0 pointer-events-none bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-60"></div>
-        
-        <!-- Decorative Glow -->
-        <div class="absolute top-0 inset-x-0 h-[500px] z-0 pointer-events-none overflow-hidden">
-            <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-100 rounded-full blur-3xl opacity-50"></div>
-        </div>
+<body class="antialiased">
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div class="site-backdrop-welcome absolute inset-0"></div>
+        <div class="ambient-orb left-[8%] top-[10%] h-72 w-72 bg-teal-200/35"></div>
+        <div class="ambient-orb bottom-[10%] right-[8%] h-96 w-96 bg-amber-200/25"></div>
+    </div>
 
-        <!-- Navigation -->
-        <header class="relative z-10 border-b border-slate-200/50 bg-white/50 backdrop-blur-md">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
-                    <div class="flex-shrink-0 flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-600/30">
-                            J
-                        </div>
-                        <span class="font-bold text-xl tracking-tight text-slate-900">JobBoard</span>
-                    </div>
-                    
-                    <nav class="flex items-center gap-6">
-                        @auth
-                            <a href="{{ url('/dashboard') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Dashboard</a>
-                            <a href="{{ route('jobs.index') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Browse Jobs</a>
-                        @else
-                            <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900 transition">Log in</a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-sm">Sign up free</a>
-                            @endif
-                        @endauth
-                    </nav>
+    <div class="relative">
+        <header class="mx-auto max-w-7xl px-6 pt-6 sm:px-10">
+            <div class="glass-nav flex items-center justify-between rounded-[1.8rem] px-6 py-4">
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-slate-950 text-sm font-black text-white">TH</span>
+                    <p class="font-display text-lg font-black tracking-tight text-slate-950 dark:text-white">Talent Hub</p>
                 </div>
+
+                <nav class="flex items-center gap-3">
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="btn-secondary">Dashboard</a>
+                    @else
+                        <a href="{{ route('login') }}" class="btn-secondary">Log in</a>
+                        <a href="{{ route('register') }}" class="btn-primary">Create account</a>
+                    @endauth
+                </nav>
             </div>
         </header>
 
-        <!-- Hero Section -->
-        <main class="flex-1 flex items-center relative z-10">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-sm font-medium mb-8 shadow-sm">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                    </span>
-                    Now hiring in tech & design
-                </div>
-                
-                <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 mb-8 max-w-4xl mx-auto leading-tight">
-                    Find the perfect job that <br class="hidden md:block" />
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">matches your skills</span>
-                </h1>
-                
-                <p class="text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed">
-                    Connect with top companies, apply seamlessly, and track your applications all in one place. Your next career move starts right here.
-                </p>
-                
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                    @auth
-                        <a href="{{ route('jobs.index') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 hover:-translate-y-0.5 w-full sm:w-auto">
-                            Explore Opportunities
-                        </a>
-                    @else
-                        <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 hover:-translate-y-0.5 w-full sm:w-auto">
-                            Create Your Profile
-                        </a>
-                        <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm hover:shadow w-full sm:w-auto">
-                            Sign In to Apply
-                        </a>
-                    @endauth
-                </div>
-                
-                <!-- Footer area of hero -->
-                <div class="mt-32 pt-10 border-t border-slate-200/60 text-slate-500 text-sm flex flex-col md:flex-row items-center justify-between">
-                    <p>&copy; {{ date('Y') }} {{ config('app.name', 'JobBoard CRM') }}. All rights reserved.</p>
-                    <div class="flex gap-6 mt-4 md:mt-0 font-medium">
-                        <a href="#" class="hover:text-slate-900 transition">Privacy Policy</a>
-                        <a href="#" class="hover:text-slate-900 transition">Terms of Service</a>
+        <main class="mx-auto max-w-7xl px-6 pb-20 pt-10 sm:px-10 lg:pb-24 lg:pt-14">
+            <section class="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+                <div>
+                    <p class="inline-flex rounded-full border border-teal-200 bg-teal-50/80 px-4 py-2 text-xs font-bold uppercase tracking-[0.32em] text-teal-800">
+                        Hiring CRM
+                    </p>
+                    <h1 class="hero-title mt-8 max-w-5xl font-display text-5xl font-black leading-[0.92] text-slate-950 dark:text-white sm:text-6xl lg:text-7xl">
+                        Better hiring, less noise.
+                    </h1>
+                    <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-700 dark:text-slate-200">
+                        Hiring teams and candidates can stay organized with clearer profiles, company follows, and streamlined job management.
+                    </p>
+
+                    <div class="mt-8 flex flex-wrap gap-4">
+                        <a href="{{ route('register') }}" class="btn-primary">Get started</a>
                     </div>
                 </div>
-            </div>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="hero-card">
+                        <p class="eyebrow text-teal-700">Companies</p>
+                        <p class="mt-3 text-base font-semibold text-slate-950 dark:text-white">Public profiles and open roles.</p>
+                    </div>
+                    <div class="hero-card">
+                        <p class="eyebrow text-amber-700">Recruiters</p>
+                        <p class="mt-3 text-base font-semibold text-slate-950 dark:text-white">Verified before posting.</p>
+                    </div>
+                    <div class="hero-card">
+                        <p class="eyebrow text-sky-700">Candidates</p>
+                        <p class="mt-3 text-base font-semibold text-slate-950 dark:text-white">Follow companies and track apps.</p>
+                    </div>
+                    <div class="hero-card bg-[linear-gradient(135deg,rgba(15,23,42,0.95),rgba(18,117,136,0.92))] text-white">
+                        <p class="eyebrow text-white/70">Jobs</p>
+                        <p class="mt-3 text-base font-semibold">Open, clear, and easy to manage.</p>
+                    </div>
+                </div>
+            </section>
         </main>
+
+        @include('layouts.support-footer')
     </div>
 </body>
 </html>

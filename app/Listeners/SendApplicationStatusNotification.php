@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\ApplicationStatusUpdated;
 use App\Notifications\BasicNotification;
-use App\Notifications\EmailNotificationDecorator;
 use App\Notifications\LogNotificationDecorator;
 
 class SendApplicationStatusNotification
@@ -28,9 +27,10 @@ class SendApplicationStatusNotification
 
         $messages = [
             'shortlisted' => "You have been shortlisted for \"{$jobTitle}\".",
-            'interview'   => "An interview has been scheduled for \"{$jobTitle}\". We will contact you with details shortly.",
+            'interview_scheduled' => "An interview has been scheduled for \"{$jobTitle}\". We will contact you with details shortly.",
+            'hired' => "Congratulations. You have been marked hired for \"{$jobTitle}\".",
             'rejected'    => "Your application for \"{$jobTitle}\" was not successful at this time.",
-            'pending'     => "Your application for \"{$jobTitle}\" has been moved back to pending review.",
+            'applied'     => "Your application for \"{$jobTitle}\" is under review.",
         ];
 
         if (!isset($messages[$newStatus])) {
@@ -46,11 +46,6 @@ class SendApplicationStatusNotification
 
         // Wrap with log decorator (always log)
         $notification = new LogNotificationDecorator($notification);
-
-        // Wrap with email decorator only for interview status
-        if ($newStatus === 'interview') {
-            $notification = new EmailNotificationDecorator($notification, $application);
-        }
 
         $notification->send($user, $message, $newStatus);
     }
