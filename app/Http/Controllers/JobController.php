@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Factories\InterviewPlanFactory;
 use App\Models\Job;
-use App\Strategies\JobSearch\JobTypeFilterStrategy;
-use App\Strategies\JobSearch\KeywordFilterStrategy;
-use App\Strategies\JobSearch\LocationFilterStrategy;
+use App\Patterns\Decorator\JobSearch\JobTypeFilterDecorator;
+use App\Patterns\Decorator\JobSearch\KeywordFilterDecorator;
+use App\Patterns\Decorator\JobSearch\LocationFilterDecorator;
+use App\Patterns\Decorator\JobSearch\BaseJobSearchQuery;
 use Illuminate\Http\Request;
 
 class JobController extends Controller
@@ -20,17 +21,19 @@ class JobController extends Controller
 
         $query = Job::with(['companyProfile', 'recruiter.user'])->latest();
 
-        $strategies = [
-            'search' => KeywordFilterStrategy::class,
-            'location' => LocationFilterStrategy::class,
-            'job_type' => JobTypeFilterStrategy::class,
-        ];
+        $jobQuery = new BaseJobSearchQuery($query);
 
-        foreach ($strategies as $key => $strategyClass) {
-            if ($request->filled($key)) {
-                $query = (new $strategyClass())->apply($query, $request->input($key));
-            }
+        if ($request->filled('search')) {
+            $jobQuery = new KeywordFilterDecorator($jobQuery, $request->input('search'));
         }
+        if ($request->filled('location')) {
+            $jobQuery = new LocationFilterDecorator($jobQuery, $request->input('location'));
+        }
+        if ($request->filled('job_type')) {
+            $jobQuery = new JobTypeFilterDecorator($jobQuery, $request->input('job_type'));
+        }
+
+        $query = $jobQuery->getQuery();
 
         if (auth()->user()->isRecruiter()) {
             $query->where('user_id', auth()->id());

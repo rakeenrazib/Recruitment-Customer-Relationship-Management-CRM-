@@ -30,3 +30,7 @@
 	b. Candidate receives notification for evaluation
 3. Modified Observer pattern for Company Follower notifications
 4. Added comments to Singleton, Strategy, Obersever pattern codes
+
+(4) Latest updates:
+1. Decorator removed from Notifications, used for Job Search Filters (replaced Strategy)
+2. New database

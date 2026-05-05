@@ -295,15 +295,15 @@
                             <p class="eyebrow">Quick Access</p>
                             <h3 class="mt-2 font-display text-xl font-black text-slate-950">Useful Links</h3>
                             <div class="mt-4 space-y-3">
-                                <a href="{{ route('profile.edit') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Profile settings</a>
+                                <a href="{{ route('profile.edit') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Profile Settings</a>
                                 @if(auth()->user()->isRecruiter() && auth()->user()->canRecruit())
-                                    <a href="{{ route('jobs.create') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Add New Job</a>
+                                    <a href="{{ route('jobs.create') }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Post New Job</a>
                                 @endif
                                 @if(auth()->user()->isRecruiter() && auth()->user()->recruiter)
-                                <a href="{{ route('recruiters.show', auth()->user()->recruiter) }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Recruiter profile</a>
+                                <a href="{{ route('recruiters.show', auth()->user()->recruiter) }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Public Profile</a>
                                 @endif
                                 @if(auth()->user()->isCompany() && auth()->user()->company)
-                                    <a href="{{ route('companies.show', auth()->user()->company) }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Public profile</a>
+                                    <a href="{{ route('companies.show', auth()->user()->company) }}" class="panel-soft block p-4 text-sm font-semibold text-slate-950 transition hover:-translate-y-0.5">Public Profile</a>
                                 @endif
                             </div>
                         </div>

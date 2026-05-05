@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\ApplicationStatusUpdated;
 use App\Notifications\BasicNotification;
-use App\Notifications\LogNotificationDecorator;
 
 class SendApplicationStatusNotification
 {
@@ -41,12 +40,11 @@ class SendApplicationStatusNotification
         $user    = $application->user;
         $message = $messages[$newStatus];
 
-        // Start with the base notification (saves to DB)
+        // Save the notification to the DB
         $notification = new BasicNotification();
-
-        // Wrap with log decorator (always log)
-        $notification = new LogNotificationDecorator($notification);
-
         $notification->send($user, $message, $newStatus);
+
+        // Explicitly log the notification instead of using a Decorator
+        \Illuminate\Support\Facades\Log::info("Notification sent to {$user->email}: {$message}");
     }
 }

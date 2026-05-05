@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Factories\UserFactory;
 use App\Models\Candidate;
 use App\Models\User;
+use App\Models\Job;
+use App\Models\RecruiterVerificationRequest;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
@@ -18,161 +20,98 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'role' => 'candidate',
-                'password' => bcrypt('password'),
-            ]
-        );
+        // 1. Companies
+        $aurora = UserFactory::create('company', [
+            'company_name' => 'Aurora Fintech Labs',
+            'email' => 'hello@aurorafintech.test',
+            'password' => 'password',
+            'industry' => 'Financial Technology',
+            'website' => 'https://aurorafintech.test',
+            'location' => 'Banani, Dhaka',
+            'description' => 'A leading fintech company in Bangladesh.'
+        ]);
 
-        Candidate::firstOrCreate(
-            ['user_id' => $user->id],
-            [
-                'full_name' => 'Test User',
-                'location' => 'Dhaka',
-            ]
-        );
+        $pixelbridge = UserFactory::create('company', [
+            'company_name' => 'PixelBridge Studio',
+            'email' => 'careers@pixelbridge.test',
+            'password' => 'password',
+            'industry' => 'Digital Product Agency',
+            'website' => 'https://pixelbridge.test',
+            'location' => 'Gulshan, Dhaka',
+            'description' => 'A digital product agency focusing on great UX.'
+        ]);
 
-        $companies = [
-            [
-                'company_name' => 'Grameen Link',
-                'industry' => 'Telecommunications',
-                'website' => 'https://grameenlink.test',
-                'description' => 'A major telecommunications provider in Bangladesh offering mobile and internet services.',
-                'location' => 'Dhaka',
-                'email' => 'hello@grameenlink.test',
-                'recruiters' => [
-                    [
-                        'full_name' => 'Amina Rahman',
-                        'department' => 'Network Operations',
-                        'title' => 'Senior Recruiter',
-                        'phone' => '+8801711000001',
-                        'email' => 'amina.rahman@grameenlink.test',
-                    ],
-                    [
-                        'full_name' => 'Sajid Khan',
-                        'department' => 'Talent Acquisition',
-                        'title' => 'Recruitment Lead',
-                        'phone' => '+8801711000002',
-                        'email' => 'sajid.khan@grameenlink.test',
-                    ],
-                ],
-            ],
-            [
-                'company_name' => 'Over Care',
-                'industry' => 'Healthcare Services',
-                'website' => 'https://overcare.test',
-                'description' => 'Healthcare services company focused on patient care, digital health, and medical staffing solutions.',
-                'location' => 'Chittagong',
-                'email' => 'contact@overcare.test',
-                'recruiters' => [
-                    [
-                        'full_name' => 'Nabila Siddique',
-                        'department' => 'Clinical Recruiting',
-                        'title' => 'Recruitment Specialist',
-                        'phone' => '+8801711000003',
-                        'email' => 'nabila.siddique@overcare.test',
-                    ],
-                    [
-                        'full_name' => 'Fahad Islam',
-                        'department' => 'Human Resources',
-                        'title' => 'Recruiter',
-                        'phone' => '+8801711000004',
-                        'email' => 'fahad.islam@overcare.test',
-                    ],
-                ],
-            ],
-            [
-                'company_name' => 'Tonda',
-                'industry' => 'Automotive',
-                'website' => 'https://tonda.test',
-                'description' => 'Automotive company specializing in car manufacturing, mobility solutions, and vehicle services.',
-                'location' => 'Sylhet',
-                'email' => 'info@tonda.test',
-                'recruiters' => [
-                    [
-                        'full_name' => 'Mousumi Hossain',
-                        'department' => 'Engineering Recruiting',
-                        'title' => 'Lead Recruiter',
-                        'phone' => '+8801711000005',
-                        'email' => 'mousumi.hossain@tonda.test',
-                    ],
-                    [
-                        'full_name' => 'Jahid Hasan',
-                        'department' => 'Operations',
-                        'title' => 'Senior Recruiter',
-                        'phone' => '+8801711000006',
-                        'email' => 'jahid.hasan@tonda.test',
-                    ],
-                ],
-            ],
-        ];
+        // 2. Recruiters
+        $nadia = UserFactory::create('recruiter', [
+            'full_name' => 'Nadia Rahman',
+            'email' => 'nadia.rahman@aurorafintech.test',
+            'password' => 'password',
+            'company_id' => $aurora->company->id,
+            'title' => 'Senior Technical Recruiter',
+            'phone' => '+880 1712-480219',
+        ]);
+        // Verify Nadia
+        $nadia->recruiter->update(['verified_at' => now()]);
+        RecruiterVerificationRequest::where('recruiter_id', $nadia->recruiter->id)->update(['status' => 'approved']);
 
-        foreach ($companies as $companyData) {
-            $companyUser = User::where('email', $companyData['email'])->first();
+        $marcus = UserFactory::create('recruiter', [
+            'full_name' => 'Marcus Chen',
+            'email' => 'marcus.chen@pixelbridge.test',
+            'password' => 'password',
+            'company_id' => $pixelbridge->company->id,
+            'title' => 'Talent Partner',
+            'phone' => '+880 1819-774530',
+        ]);
+        // Verify Marcus
+        $marcus->recruiter->update(['verified_at' => now()]);
+        RecruiterVerificationRequest::where('recruiter_id', $marcus->recruiter->id)->update(['status' => 'approved']);
 
-            if (! $companyUser) {
-                $companyUser = UserFactory::create('company', [
-                    'company_name' => $companyData['company_name'],
-                    'industry' => $companyData['industry'],
-                    'website' => $companyData['website'],
-                    'description' => $companyData['description'],
-                    'location' => $companyData['location'],
-                    'email' => $companyData['email'],
-                    'password' => 'password',
-                ]);
-            }
+        // 3. Candidates
+        $farhan = UserFactory::create('candidate', [
+            'full_name' => 'Farhan Ahmed',
+            'email' => 'farhan.ahmed@example.test',
+            'password' => 'password',
+            'location' => 'Dhanmondi, Dhaka',
+            'portfolio' => 'https://farhanahmed.dev',
+        ]);
+        $farhan->update(['skills' => 'Laravel, REST APIs, MySQL, Vue.js, Tailwind CSS']);
 
-            foreach ($companyData['recruiters'] as $recruiterData) {
-                if (User::where('email', $recruiterData['email'])->exists()) {
-                    continue;
-                }
+        $sadia = UserFactory::create('candidate', [
+            'full_name' => 'Sadia Islam',
+            'email' => 'sadia.islam@example.test',
+            'password' => 'password',
+            'location' => 'Uttara, Dhaka',
+            'portfolio' => 'https://sadia.design',
+        ]);
+        $sadia->update(['skills' => 'Product Design, Figma, UX Research, Design Systems, HTML/CSS']);
 
-                UserFactory::create('recruiter', [
-                    'company_id' => $companyUser->company->id,
-                    'full_name' => $recruiterData['full_name'],
-                    'phone' => $recruiterData['phone'],
-                    'location' => $companyData['location'],
-                    'department' => $recruiterData['department'],
-                    'title' => $recruiterData['title'],
-                    'bio' => 'Experienced recruiter supporting hiring for ' . $companyData['company_name'] . '.',
-                    'email' => $recruiterData['email'],
-                    'password' => 'password',
-                    'verification_message' => 'Please verify my recruiter account for ' . $companyData['company_name'] . '.',
-                ]);
-            }
-        }
+        // 4. Jobs
+        Job::create([
+            'user_id' => $nadia->id,
+            'recruiter_id' => $nadia->recruiter->id,
+            'company_id' => $aurora->company->id,
+            'title' => 'Senior Laravel Engineer',
+            'company' => 'Aurora Fintech Labs',
+            'location' => 'Hybrid - Banani, Dhaka',
+            'salary' => 185000,
+            'job_type' => 'full-time',
+            'status' => 'open',
+            'description' => 'We are looking for a Senior Laravel Engineer to join our team and build scalable APIs.',
+            'requirements' => 'Laravel, PHP, MySQL',
+        ]);
 
-        $candidates = [
-            ['full_name' => 'Rahim Ahmed', 'email' => 'rahim.ahmed@example.com', 'phone' => '+8801712000001', 'location' => 'Dhaka', 'bio' => 'Software engineer with a strong background in backend development.'],
-            ['full_name' => 'Mina Akter', 'email' => 'mina.akter@example.com', 'phone' => '+8801712000002', 'location' => 'Chittagong', 'bio' => 'Healthcare administration professional focused on patient experience.'],
-            ['full_name' => 'Sabbir Hossain', 'email' => 'sabbir.hossain@example.com', 'phone' => '+8801712000003', 'location' => 'Khulna', 'bio' => 'Automotive engineer with experience in vehicle design and quality assurance.'],
-            ['full_name' => 'Farhana Parvin', 'email' => 'farhana.parvin@example.com', 'phone' => '+8801712000004', 'location' => 'Sylhet', 'bio' => 'Digital marketing specialist with healthcare and telecom campaign experience.'],
-            ['full_name' => 'Imran Noor', 'email' => 'imran.noor@example.com', 'phone' => '+8801712000005', 'location' => 'Rajshahi', 'bio' => 'Operations manager with strong logistics and automotive supply chain knowledge.'],
-            ['full_name' => 'Sadia Islam', 'email' => 'sadia.islam@example.com', 'phone' => '+8801712000006', 'location' => 'Barisal', 'bio' => 'Talent acquisition professional with experience in recruiting technical and clinical roles.'],
-            ['full_name' => 'Tanzim Karim', 'email' => 'tanzim.karim@example.com', 'phone' => '+8801712000007', 'location' => 'Rangpur', 'bio' => 'UI/UX designer who builds user-centered digital products.'],
-            ['full_name' => 'Lamia Sultana', 'email' => 'lamia.sultana@example.com', 'phone' => '+8801712000008', 'location' => 'Mymensingh', 'bio' => 'Customer support leader with telecom and healthcare service experience.'],
-            ['full_name' => 'Rashed Chowdhury', 'email' => 'rashed.chowdhury@example.com', 'phone' => '+8801712000009', 'location' => 'Comilla', 'bio' => 'Business analyst specializing in automotive market research.'],
-            ['full_name' => 'Nusrat Jahan', 'email' => 'nusrat.jahan@example.com', 'phone' => '+8801712000010', 'location' => 'Gazipur', 'bio' => 'Recruitment coordinator passionate about matching candidates to growth-stage companies.'],
-        ];
-
-        foreach ($candidates as $candidateData) {
-            if (User::where('email', $candidateData['email'])->exists()) {
-                continue;
-            }
-
-            UserFactory::create('candidate', [
-                'full_name' => $candidateData['full_name'],
-                'email' => $candidateData['email'],
-                'password' => 'password',
-                'phone' => $candidateData['phone'],
-                'location' => $candidateData['location'],
-                'bio' => $candidateData['bio'],
-                'portfolio' => 'https://portfolio.example/' . Str::slug($candidateData['full_name']),
-                'resume_link' => 'https://resume.example/' . Str::slug($candidateData['full_name']),
-            ]);
-        }
+        Job::create([
+            'user_id' => $marcus->id,
+            'recruiter_id' => $marcus->recruiter->id,
+            'company_id' => $pixelbridge->company->id,
+            'title' => 'Product Designer',
+            'company' => 'PixelBridge Studio',
+            'location' => 'On-site - Gulshan, Dhaka',
+            'salary' => 140000,
+            'job_type' => 'full-time',
+            'status' => 'open',
+            'description' => 'We need an excellent Product Designer to lead design systems and UX research.',
+            'requirements' => 'Figma, UI/UX, Design Systems',
+        ]);
     }
 }

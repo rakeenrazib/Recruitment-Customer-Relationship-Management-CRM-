@@ -21,6 +21,7 @@
         teamworkScore: '{{ old('teamwork_score', $rubrics['teamwork_score'] ?? '') }}',
         adaptabilityScore: '{{ old('adaptability_score', $rubrics['adaptability_score'] ?? '') }}',
         conflictHandlingScore: '{{ old('conflict_handling_score', $rubrics['conflict_handling_score'] ?? '') }}',
+        plagiarismDetected: {{ old('plagiarism_detected', $rubrics['plagiarism_detected'] ?? false) ? 'true' : 'false' }},
         normalize(value) {
             return value === '' ? null : parseFloat(value);
         },
@@ -135,9 +136,9 @@
                 <input type="number" min="0" max="5" step="0.01" name="skill_competency" x-model="skillCompetency" :disabled="rubricDisabled()" class="block w-full rounded-2xl border-stone-200 bg-white px-4 py-3 text-sm text-stone-900 disabled:cursor-not-allowed disabled:bg-stone-100">
             </div>
         </div>
-        <label class="mt-4 flex items-center gap-3 text-sm text-stone-700">
-            <input type="checkbox" name="plagiarism_detected" value="1" class="rounded border-stone-300 text-stone-900" @checked(old('plagiarism_detected', $rubrics['plagiarism_detected'] ?? false)) :disabled="rubricDisabled()">
-            <span>Plagiarism Flag</span>
+        <label class="mt-4 flex items-center gap-3 text-sm transition-opacity" :class="rubricDisabled() ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'">
+            <input type="checkbox" name="plagiarism_detected" value="1" x-model="plagiarismDetected" class="h-5 w-5 rounded border-stone-300 text-rose-600 shadow-sm focus:ring-rose-600 disabled:cursor-not-allowed" :disabled="rubricDisabled()">
+            <span class="font-bold transition-colors" :class="plagiarismDetected ? 'text-rose-600' : 'text-stone-700'">Flag for Plagiarism</span>
         </label>
     </div>
 
